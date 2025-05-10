@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS Visualizer Pro</title>
+  <title>CSS & JS Visualizer Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -118,7 +118,7 @@
 
     .main-content {
       flex-grow: 1;
-      padding: 2rem;
+      padding: 2rem 0; /* MODIFIED: Vertical padding only, no horizontal */
       margin-left: var(--sidebar-width);
       overflow-y: auto;
     }
@@ -127,8 +127,11 @@
       font-size: 2rem;
       font-weight: 700;
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
       color: var(--color-text-primary);
+      padding-left: 2rem; /* ADDED */
+      padding-right: 2rem; /* ADDED */
+      box-sizing: border-box; /* ADDED */
     }
     #instructions {
       text-align:center;
@@ -138,21 +141,27 @@
       padding: 1.5rem;
       border-radius: var(--border-radius-lg);
       border: 1px solid var(--color-border-message-info);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      /* To constrain its width if main-content is full-width and #instructions should not be.
+         If it should be full-width card like property-group, remove max-width and margin-left/right. */
+      /* max-width: 800px;  */
+      /* margin-left: auto;  */
+      /* margin-right: auto; */
+      box-sizing: border-box; /* ADDED */
       font-size: 1rem;
     }
 
-
-
     .property-group {
-      background-color: var(--color-bg-content-card);
+      background-color: var(--color-bg-app);
       border-radius: var(--border-radius-lg);
       box-shadow: var(--shadow-md);
-      margin-bottom: 2.5rem;
+      margin: 0;
       padding: 2rem;
       display: none;
+      box-sizing: border-box; /* ADDED */
     }
     .property-group.active { display: block; }
+
     .property-group h2 {
       font-size: 1.5rem;
       font-weight: 600;
@@ -165,7 +174,7 @@
       font-size: 1.125rem;
       font-weight: 600;
       color: var(--color-text-secondary);
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       margin-bottom: 1rem;
     }
     .property-group h4 {
@@ -178,15 +187,13 @@
       border-bottom: 1px dashed var(--color-border-primary);
     }
 
-
-
     .controls {
       background-color: var(--color-bg-controls-panel);
       border: 1px solid var(--color-border-primary);
       border-radius: var(--border-radius-md);
       padding: 1.5rem;
       margin-top: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       display: grid;
       gap: 1.25rem;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -263,7 +270,7 @@
       overflow: auto;
       flex-wrap: wrap;
       background-color: var(--color-bg-demo-area);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
     #display-demo-area {
       display: block !important; align-items: normal !important; justify-content: normal !important;
@@ -342,18 +349,23 @@
       white-space: pre-wrap; word-break: break-all;
       margin-top: 1rem;
     }
+    .property-group > pre {
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
     .property-group > pre::before {
       content: "Live CSS:"; display: block; font-weight: 600;
       color: var(--color-text-secondary); margin-bottom: 0.5rem;
       font-family: var(--font-primary); font-size: 0.8rem; text-transform: uppercase;
+    }
+    #js-dom-manipulation #dom-js-code-output {
+      margin-bottom: 0;
     }
     #js-dom-manipulation #dom-js-code-output::before {
       content: "Example JavaScript:"; display: block; font-weight: 600;
       color: var(--color-text-secondary); margin-bottom: 0.5rem;
       font-family: var(--font-primary); font-size: 0.8rem; text-transform: uppercase;
     }
-
-
 
     .pseudo-class-example, .pseudo-element-example {
       margin-bottom: 1.5rem; padding: 1.5rem; border: 1px solid var(--color-border-primary);
@@ -451,6 +463,7 @@
       .main-content {
         margin-left: 0;
         width: 100%;
+        /* padding: 2rem 0; /* Inherits from desktop, which is correct */
       }
       .mobile-nav-toggle {
         display: block;
@@ -458,12 +471,32 @@
       .controls {
         grid-template-columns: 1fr;
       }
+      /* #app-title, #instructions will inherit their desktop padding-left/right (2rem)
+        which might be too much for medium screens. Adjust if needed. e.g.:
+     #app-title { padding-left: 1.5rem; padding-right: 1.5rem; }
+     #instructions { padding-left: 1.5rem; padding-right: 1.5rem; }
+     .property-group { padding: 1.5rem; }
+     */
     }
+
     @media (max-width: 480px) {
       html { font-size: 15px; }
-      .main-content { padding: 1rem; }
-      #app-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
-      .property-group { padding: 1rem; }
+      .main-content {
+        padding: 1rem 0; /* MODIFIED: Vertical padding only, no horizontal */
+      }
+      #app-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-left: 1rem; /* MODIFIED */
+        padding-right: 1rem; /* MODIFIED */
+      }
+      #instructions {
+        padding: 1rem; /* MODIFIED: Consistent internal padding for mobile */
+      }
+      .property-group {
+        padding: 1rem; /* This existing rule is fine and consistent */
+        border-radius: calc(var(--border-radius-lg) - 0.25rem); /* Optionally slightly smaller radius on mobile */
+      }
       .property-group h2 { font-size: 1.25rem; }
       .controls { padding: 1rem; }
     }
@@ -481,7 +514,7 @@
 </button>
 
 <aside class="sidebar" id="appSidebar">
-  <div class="sidebar-header">CSS Visualizer</div>
+  <div class="sidebar-header">CSS & JS Visualizer</div>
   <nav class="sidebar-nav" id="main-navigation-links">
     <ul>
       <!-- Links will be populated by JS -->
@@ -490,9 +523,9 @@
 
   <!-- START: Added Attribution -->
   <div style="
-    margin-top: 2rem; /* Space above the attribution */
-    padding-top: 1rem; /* Space between border and text */
-    border-top: 1px solid var(--color-border-primary); /* Separator line */
+    margin-top: 2rem; 
+    padding-top: 1rem; 
+    border-top: 1px solid var(--color-border-primary); 
     text-align: center;
     font-size: 0.8rem;
     color: var(--color-text-tertiary);
@@ -504,7 +537,7 @@
 </aside>
 
 <main class="main-content" id="mainContentArea">
-  <h1 id="app-title">CSS Property Visualizer</h1>
+  <h1 id="app-title">CSS & JS Property Visualizer</h1>
 
 
   <p id="instructions">Select a category from the sidebar to explore its properties.</p>
@@ -1434,11 +1467,6 @@
   const mobileNavToggle = $('#mobileNavToggle');
 
   propertyGroups.forEach(group => {
-    // --- START: Added condition to skip JS DOM section ---
-    if (group.id === 'js-dom-manipulation') {
-      return; // Skip creating a link for this section
-    }
-    // --- END: Added condition ---
     const title = group.querySelector('h2').textContent;
     const li = document.createElement('li');
     const a = document.createElement('a');
@@ -1602,25 +1630,23 @@
   const displaySelectForLogic = $('#display-select');
   const displayTarget1 = $('#display-target1');
   const displayTarget2 = $('#display-target2');
-  const displayTarget3 = $('#display-target3'); // Added
-  const displayTarget4 = $('#display-target4'); // Added
-  const displayTarget5 = $('#display-target5'); // Added
-  const displayTarget6 = $('#display-target6'); // Added
-  const displayTarget7 = $('#display-target7'); // Added
-  const displayTarget8 = $('#display-target8'); // Added
-  const displayTarget9 = $('#display-target9'); // Added
-  const displayTarget10 = $('#display-target10'); // Added
+  const displayTarget3 = $('#display-target3');
+  const displayTarget4 = $('#display-target4');
+  const displayTarget5 = $('#display-target5');
+  const displayTarget6 = $('#display-target6');
+  const displayTarget7 = $('#display-target7');
+  const displayTarget8 = $('#display-target8');
+  const displayTarget9 = $('#display-target9');
+  const displayTarget10 = $('#display-target10');
   const displayCssOutputForLogic = $('#display-css-output');
 
-  // Build an array of targets that exist
   const allDisplayTargets = [
     displayTarget1, displayTarget2, displayTarget3, displayTarget4, displayTarget5,
     displayTarget6, displayTarget7, displayTarget8, displayTarget9, displayTarget10
-  ].filter(target => target !== null); // Filter out any nulls if some targets don't exist
+  ].filter(target => target !== null);
 
-  // Check if the select and output exist, and at least one target exists
   if (displaySelectForLogic && displayCssOutputForLogic && allDisplayTargets.length > 0) {
-    const displayDemoAreaParent = allDisplayTargets[0].closest('.demo-area'); // Use the first existing target to find parent
+    const displayDemoAreaParent = allDisplayTargets[0].closest('.demo-area');
     let clarificationNote = null;
     if (displayDemoAreaParent) {
       clarificationNote = displayDemoAreaParent.querySelector('.clarification-note');
@@ -1629,10 +1655,9 @@
         clarificationNote.className = 'clarification-note';
         Object.assign(clarificationNote.style, { fontSize: '0.9em', fontStyle: 'italic', marginTop: '10px', textAlign: 'left', width: '100%', display: 'none', color: 'var(--color-text-secondary)' });
         const preElement = displayCssOutputForLogic;
-        // Ensure preElement's parentNode exists before inserting
         if(preElement && preElement.parentNode) {
           preElement.parentNode.insertBefore(clarificationNote, preElement);
-        } else if (displayDemoAreaParent.parentNode) { // Fallback
+        } else if (displayDemoAreaParent.parentNode) {
           displayDemoAreaParent.parentNode.insertBefore(clarificationNote, displayDemoAreaParent.nextSibling);
         }
       }
@@ -1643,7 +1668,7 @@
       let selectorParts = [];
 
       allDisplayTargets.forEach(target => {
-        if (target) { // Double check target exists before styling
+        if (target) {
           target.style.display = selectedDisplay;
           if (target.id) {
             selectorParts.push(`#${target.id}`);
@@ -1656,13 +1681,12 @@
 
       if (clarificationNote) {
         const isFlexOrGrid = selectedDisplay === 'flex' || selectedDisplay === 'grid';
-        // Updated clarification note text
         clarificationNote.innerHTML = isFlexOrGrid ? `Note: All items in this demo are now <strong>${selectedDisplay} containers</strong> themselves. They behave as block-level elements within this demo. To see how items are arranged <em>inside</em> a ${selectedDisplay} container and control container properties, please see the dedicated "Flexbox Properties" or "Grid Properties" sections.` : '';
         clarificationNote.style.display = isFlexOrGrid ? 'block' : 'none';
       }
     }
     displaySelectForLogic.addEventListener('change', handleDisplayChange);
-    handleDisplayChange(); // Initial call
+    handleDisplayChange();
   }
 
   // Position Property
@@ -2076,7 +2100,7 @@
 
   // Filter
   const filterImageTarget = $('#filter-image-target');
-  const filterSelectForFilter = $('#filter-select'); // Renamed to avoid conflict with other selects
+  const filterSelectForFilter = $('#filter-select');
   const filterCssOutput = $('#filter-css-output');
   if(filterSelectForFilter && filterImageTarget && filterCssOutput){
     filterSelectForFilter.addEventListener('change', function() { updateStyle(filterImageTarget, 'filter', this.value, filterCssOutput); });
@@ -2169,7 +2193,7 @@
     function showDomMessage(message, type = 'info') {
       if (!domMessageArea) return;
       domMessageArea.textContent = message;
-      domMessageArea.className = 'dom-message-area'; // Reset classes
+      domMessageArea.className = 'dom-message-area';
       switch(type) {
         case 'success':
           domMessageArea.style.borderColor = 'var(--color-border-message-success)';
@@ -2181,7 +2205,7 @@
           domMessageArea.style.backgroundColor = 'var(--color-bg-message-error)';
           domMessageArea.style.color = 'var(--color-text-message-error)';
           break;
-        default: // info or warning (use info style for now)
+        default:
           domMessageArea.style.borderColor = 'var(--color-border-message-info)';
           domMessageArea.style.backgroundColor = 'var(--color-bg-message-info)';
           domMessageArea.style.color = 'var(--color-text-message-info)';
