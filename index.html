@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS & JS DOM Visualizer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        #main-navigation {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #main-navigation label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        #property-category-select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+
+        h1, h2, h3, h4 {
+            color: #333;
+            margin-bottom: 0.5em;
+        }
+        h1 { text-align: center; margin-bottom: 1em; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 0.3em; margin-top: 1.5em;}
+        h3 { margin-top: 1em; color: #555; }
+        h4 { margin-top: 1em; color: #666; border-bottom: 1px dashed #ccc; padding-bottom: 0.2em;}
+
+
+        .property-group {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: none; /* Hidden by default */
+        }
+        .property-group.active {
+            display: block; /* Shown when selected */
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+        }
+        .controls label, .controls button, .controls select, .controls input {
+            margin-right: 10px;
+            margin-bottom: 5px;
+            vertical-align: middle;
+        }
+        .controls input[type="range"] {
+            vertical-align: middle;
+            width: 100px;
+        }
+        .controls br {
+            display: block;
+            content: "";
+            margin-top: 8px;
+        }
+        .controls fieldset {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .controls legend {
+            font-weight: bold;
+            color: #444;
+        }
+
+
+        .demo-area {
+            padding: 20px;
+            border: 1px dashed #ccc;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+            flex-wrap: wrap;
+        }
+
+        #display-demo-area {
+            display: block !important;
+            align-items: normal !important;
+            justify-content: normal !important;
+        }
+
+        .target-element {
+            width: 100px;
+            height: 100px;
+            background-color: lightcoral;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 14px;
+            border: 2px solid darkred;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .target-text {
+            font-size: 20px;
+            padding: 10px;
+            border: 1px solid lightgray;
+            background-color: #fff8e1;
+        }
+
+        .flex-container, .grid-container {
+            display: flex;
+            background-color: lightblue;
+            padding: 10px;
+            min-height: 150px;
+            width: 100%;
+            border: 1px solid #64b5f6;
+        }
+        .flex-item, .grid-item {
+            background-color: dodgerblue;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            border: 1px solid navy;
+            min-width: 40px;
+            box-sizing: border-box;
+        }
+        .flex-item.targeted, .grid-item.targeted {
+            outline: 3px solid orange;
+            outline-offset: 2px;
+        }
+        .js-highlight { /* Class for JS DOM direct style manipulation */
+            background-color: yellow !important;
+            color: black !important;
+            border: 2px dashed orange !important;
+        }
+
+
+        .grid-container {
+            display: grid;
+        }
+
+        /* JS DOM MANIPULATION SPECIFIC STYLES */
+        #js-dom-demo-container {
+            border: 2px solid #78909c;
+            padding: 15px;
+            min-height: 200px;
+            width: 100%;
+            background-color: #eceff1;
+            margin-bottom: 15px;
+        }
+        #js-dom-main-target {
+            background-color: #bbdefb;
+            padding: 20px;
+            border: 1px solid #1e88e5;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        #js-dom-main-target p { margin: 5px 0; padding: 5px; background: #e3f2fd; border: 1px dashed #90caf9;}
+        .js-dom-action-group { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dotted #ccc;}
+        .js-dom-action-group:last-child { border-bottom: none; }
+
+
+        #dom-message-area {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fffde7;
+            border: 1px solid #fdd835;
+            border-radius: 4px;
+            min-height: 20px;
+            font-style: italic;
+        }
+        #dom-js-code-output {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Styles for Pseudo-classes Demo (same as before) */
+        .pseudo-class-example { margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; background-color: #fafafa; }
+        .pseudo-class-example .demo-box { padding: 10px; border: 1px solid #999; background-color: #f0f0f0; margin-bottom: 5px; transition: all 0.2s ease-in-out;}
+        .pseudo-class-example button, .pseudo-class-example input, .pseudo-class-example a { margin: 5px;}
+        .pseudo-class-example .hover-box:hover { background-color: #ffd700; color: black; }
+        .pseudo-class-example .active-button:active { background-color: #ff8c00; transform: scale(0.95); }
+        .pseudo-class-example .focus-input:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,.5); }
+        .pseudo-class-example .check-me:checked + label { color: #28a745; font-weight: bold; }
+        .pseudo-class-example .disabled-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: #ccc; }
+        .pseudo-class-example .enabled-button:enabled { background-color: #28a745; color: white; }
+        .pseudo-class-example .nth-list-demo li:nth-child(odd) { background-color: #e9ecef; }
+        .pseudo-class-example .nth-list-demo li:nth-child(even) { background-color: #ced4da; }
+        .pseudo-class-example .first-child-demo p:first-child { color: #dc3545; font-weight: bold; }
+        .pseudo-class-example .last-child-demo p:last-child { color: #17a2b8; font-style: italic; }
+        .pseudo-class-example .empty-div-demo div:empty { height: 30px; background-color: #ffc107; border: 1px dashed #c89300; content: "I'm empty!"; display:flex; align-items:center; justify-content:center; color: #555;}
+        .pseudo-class-example .target-demo-section:target { background-color: #cfe2ff; border-left: 5px solid #0d6efd; padding-left: 10px;}
+        .pseudo-class-example .link-demo a:link { color: #0d6efd; }
+        .pseudo-class-example .link-demo a:visited { color: #6f42c1; }
+
+        /* Styles for Pseudo-elements Demo (same as before) */
+        .pseudo-element-example { margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; background-color: #fafafa;}
+        .pseudo-element-example .demo-text-block { padding: 10px; border: 1px solid #999; background-color: #f8f9fa; margin-bottom: 5px;}
+        .pseudo-element-example .before-after-demo::before { content: "« Start | "; color: #007bff; font-weight: bold; margin-right: 5px;}
+        .pseudo-element-example .before-after-demo::after { content: " | End »"; color: #007bff; font-weight: bold; margin-left: 5px;}
+        .pseudo-element-example .first-letter-demo p::first-letter { font-size: 2.5em; color: #dc3545; float: left; margin-right: 0.1em; line-height: 1;}
+        .pseudo-element-example .first-line-demo p::first-line { color: #198754; font-weight: bold;}
+        .pseudo-element-example .selection-demo p::selection { background-color: #ffc107; color: #000;}
+        .pseudo-element-example .marker-demo ul { list-style: none; padding-left: 0;}
+        .pseudo-element-example .marker-demo li::marker { content: "► "; color: #6f42c1;}
+        .pseudo-element-example .placeholder-demo input::placeholder { color: #fd7e14; font-style: italic;}
+
+        pre {
+            background: #2d2d2d; color: #ccc; padding: 10px;
+            border-radius: 4px; overflow-x: auto; font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .code-display {
+            background: #eef; color: #334; padding: 8px;
+            border-radius: 4px; overflow-x: auto; font-family: monospace;
+            margin-top: 5px; white-space: pre-wrap; border: 1px solid #ccd;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>CSS & JS DOM Visualizer</h1>
+
+    <div id="main-navigation">
+        <label for="property-category-select">Select Category:</label>
+        <select id="property-category-select">
+            <option value="">-- Select a Category --</option>
+        </select>
+    </div>
+
+    <p id="instructions" style="text-align:center; font-style: italic;">Select a category from the dropdown above to see its properties.</p>
+
+    <!-- Transform Property (Full HTML from previous correct version) -->
+    <section class="property-group" id="transform-properties">
+        <h2>Transform Property</h2>
+        <div class="controls">
+            <label for="transform-select">Function:</label>
+            <select id="transform-select">
+                <option value="none">none</option>
+                <option value="translate(20px, 10px)">translate(20px, 10px)</option>
+                <option value="translateX(30px)">translateX(30px)</option>
+                <option value="translateY(-20px)">translateY(-20px)</option>
+                <option value="translateZ(50px)">translateZ(50px) (needs perspective)</option>
+                <option value="scale(1.5)">scale(1.5)</option>
+                <option value="scaleX(0.8)">scaleX(0.8)</option>
+                <option value="scaleY(1.2)">scaleY(1.2)</option>
+                <option value="rotate(45deg)">rotate(45deg)</option>
+                <option value="rotateX(45deg)">rotateX(45deg) (needs perspective)</option>
+                <option value="rotateY(45deg)">rotateY(45deg) (needs perspective)</option>
+                <option value="skew(10deg, 5deg)">skew(10deg, 5deg)</option>
+                <option value="skewX(20deg)">skewX(20deg)</option>
+                <option value="matrix(1, -0.1, 0, 1, 0, 0)">matrix(1, -0.1, 0, 1, 0, 0) (2D matrix)</option>
+            </select>
+            <label for="transform-origin">Origin:</label>
+            <input type="text" id="transform-origin-input" value="center center" placeholder="e.g., top left, 50% 50%">
+            <label for="perspective-input">Perspective (for 3D):</label>
+            <input type="text" id="perspective-input" value="300px" placeholder="e.g., 300px">
+        </div>
+        <div class="demo-area" id="transform-demo-area">
+            <div class="target-element" id="transform-target">Transform Me</div>
+        </div>
+        <pre id="transform-css-output">transform: none;</pre>
+    </section>
+
+    <!-- Text Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="text-properties">
+        <h2>Text Properties</h2>
+        <div class="controls">
+            <label for="text-align-select">text-align:</label>
+            <select id="text-align-select">
+                <option value="left">left</option>
+                <option value="center">center</option>
+                <option value="right">right</option>
+                <option value="justify">justify</option>
+            </select>
+            <label for="text-decoration-select">text-decoration:</label>
+            <select id="text-decoration-select">
+                <option value="none">none</option>
+                <option value="underline">underline</option>
+                <option value="overline">overline</option>
+                <option value="line-through">line-through</option>
+            </select>
+            <br>
+            <label for="text-transform-select">text-transform:</label>
+            <select id="text-transform-select">
+                <option value="none">none</option>
+                <option value="capitalize">capitalize</option>
+                <option value="uppercase">uppercase</option>
+                <option value="lowercase">lowercase</option>
+            </select>
+            <label for="text-indent-input">text-indent:</label>
+            <input type="text" id="text-indent-input" value="0px" placeholder="e.g., 20px, 2em">
+            <label for="text-shadow-input">text-shadow:</label>
+            <input type="text" id="text-shadow-input" value="none" placeholder="e.g., 2px 2px 2px red">
+        </div>
+        <div class="demo-area" style="flex-direction: column; align-items: stretch;">
+            <p class="target-text" id="text-target">This is some sample text. It is long enough to demonstrate justification and other text properties effectively. You can change its alignment, decoration, and transformation using the controls above.</p>
+        </div>
+        <pre id="text-css-output">/* Text styles will appear here */</pre>
+    </section>
+
+    <!-- Layout Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="layout-properties">
+        <h2>Layout Properties</h2>
+
+        <h3>Display</h3>
+        <div class="controls">
+            <label for="display-select">display:</label>
+            <select id="display-select">
+                <option value="block">block</option>
+                <option value="inline">inline</option>
+                <option value="inline-block">inline-block</option>
+                <option value="flex">flex (makes items flex containers)</option>
+                <option value="grid">grid (makes items grid containers)</option>
+                <option value="none">none</option>
+            </select>
+        </div>
+        <div class="demo-area" id="display-demo-area">
+            <div id="display-target1" style="background: #ffcc80; padding:10px; margin:5px; border:1px solid #ffa726;">Item 1</div>
+            <div id="display-target2" style="background: #ffcc80; padding:10px; margin:5px; border:1px solid #ffa726;">Item 2</div>
+        </div>
+        <pre id="display-css-output">/* Display styles will appear here */</pre>
+
+        <h3>Position</h3>
+        <div class="controls">
+            <label for="position-select">position:</label>
+            <select id="position-select">
+                <option value="static">static</option>
+                <option value="relative">relative (then use top/left)</option>
+                <option value="absolute">absolute (relative to demo-area)</option>
+                <option value="fixed">fixed (relative to viewport)</option>
+                <option value="sticky">sticky (needs scroll, top:0)</option>
+            </select>
+            <input type="text" id="position-top" placeholder="top (e.g. 10px)">
+            <input type="text" id="position-left" placeholder="left (e.g. 10px)">
+        </div>
+        <div class="demo-area" style="height: 200px; background: #e3f2fd;">
+            <div class="target-element" id="position-target" style="width:80px; height:80px; background: #90caf9;">Position Me</div>
+            <p style="height:300px;">Scroll within this demo area for sticky.</p>
+        </div>
+        <pre id="position-css-output">position: static;</pre>
+
+        <h3>Overflow</h3>
+        <div class="controls">
+            <label for="overflow-select">overflow:</label>
+            <select id="overflow-select">
+                <option value="visible">visible (default)</option>
+                <option value="hidden">hidden</option>
+                <option value="scroll">scroll</option>
+                <option value="auto">auto</option>
+            </select>
+        </div>
+        <div class="demo-area" id="overflow-demo-area" style="height: 100px; width: 200px;">
+            <div id="overflow-target" style="width: 300px; height: 150px; background: #c8e6c9;">
+                This content is wider and taller than its container to demonstrate the overflow property.
+            </div>
+        </div>
+        <pre id="overflow-css-output">overflow: visible;</pre>
+    </section>
+
+    <!-- Flexbox Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="flexbox-properties">
+        <h2>Flexbox Properties</h2>
+        <h3>Flex Container Properties</h3>
+        <div class="controls">
+            <label for="flex-direction-select">flex-direction:</label>
+            <select id="flex-direction-select">
+                <option value="row">row</option>
+                <option value="row-reverse">row-reverse</option>
+                <option value="column">column</option>
+                <option value="column-reverse">column-reverse</option>
+            </select>
+            <label for="justify-content-select">justify-content:</label>
+            <select id="justify-content-select">
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="space-between">space-between</option>
+                <option value="space-around">space-around</option>
+                <option value="space-evenly">space-evenly</option>
+            </select>
+            <br>
+            <label for="align-items-select">align-items:</label>
+            <select id="align-items-select">
+                <option value="stretch">stretch</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="baseline">baseline</option>
+            </select>
+            <label for="flex-wrap-select">flex-wrap:</label>
+            <select id="flex-wrap-select">
+                <option value="nowrap">nowrap</option>
+                <option value="wrap">wrap</option>
+                <option value="wrap-reverse">wrap-reverse</option>
+            </select>
+        </div>
+        <div class="demo-area">
+            <div class="flex-container" id="flex-container-target">
+                <div class="flex-item" style="min-height: 30px; order: 0;" data-item-index="0">1</div>
+                <div class="flex-item" style="min-height: 50px; order: 0;" data-item-index="1">2 (taller)</div>
+                <div class="flex-item" style="min-height: 20px; order: 0;" data-item-index="2">3</div>
+                <div class="flex-item" style="min-height: 40px; order: 0;" data-item-index="3">4</div>
+                <div class="flex-item" style="min-height: 25px; order: 0;" data-item-index="4">5</div>
+            </div>
+        </div>
+        <pre id="flex-container-css-output">/* Flex container styles will appear here */</pre>
+
+        <h3>Flex Item Properties (applied to selected item - default Item 2)</h3>
+        <div class="controls">
+            <label for="flex-item-select-target">Target Item:</label>
+            <select id="flex-item-select-target">
+                <option value="1">Item 2</option>
+                <option value="0">Item 1</option>
+                <option value="2">Item 3</option>
+                <option value="3">Item 4</option>
+                <option value="4">Item 5</option>
+            </select>
+            <br>
+            <label for="flex-grow-range">flex-grow: <span id="flex-grow-value">0</span></label>
+            <input type="range" id="flex-grow-range" min="0" max="5" step="1" value="0">
+
+            <label for="flex-shrink-range">flex-shrink: <span id="flex-shrink-value">1</span></label>
+            <input type="range" id="flex-shrink-range" min="0" max="5" step="1" value="1">
+            <br>
+            <label for="flex-basis-select">flex-basis:</label>
+            <select id="flex-basis-select">
+                <option value="auto">auto</option>
+                <option value="content">content</option>
+                <option value="0%">0%</option>
+                <option value="50px">50px</option>
+                <option value="100px">100px</option>
+                <option value="20%">20%</option>
+                <option value="custom">Custom...</option>
+            </select>
+            <input type="text" id="flex-basis-custom" placeholder="e.g., 120px" style="display:none; width:80px;">
+            <br>
+            <label for="flex-item-align-self-select">align-self:</label>
+            <select id="flex-item-align-self-select">
+                <option value="auto">auto</option>
+                <option value="stretch">stretch</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="baseline">baseline</option>
+            </select>
+
+            <label for="flex-item-order-input">order: </label>
+            <input type="number" id="flex-item-order-input" value="0" style="width:60px;">
+        </div>
+        <pre id="flex-item-css-output">/* Flex item styles will appear here */</pre>
+    </section>
+
+    <!-- Grid Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="grid-properties">
+        <h2>Grid Properties</h2>
+        <h3>Grid Container Properties</h3>
+        <div class="controls">
+            <label for="grid-cols-pattern-select">grid-template-columns (Pattern):</label>
+            <select id="grid-cols-pattern-select">
+                <option value="repeat(3, 1fr)">repeat(3, 1fr) (Default)</option>
+                <option value="100px 1fr auto">100px 1fr auto</option>
+                <option value="repeat(auto-fit, minmax(100px, 1fr))">repeat(auto-fit, minmax(100px, 1fr))</option>
+                <option value="none">none (implicit columns)</option>
+                <option value="custom">Custom...</option>
+            </select>
+            <input type="text" id="grid-cols-custom" placeholder="e.g., 1fr 2fr" style="display:none; width: 150px;">
+            <br>
+            <label for="grid-rows-pattern-select">grid-template-rows (Pattern):</label>
+            <select id="grid-rows-pattern-select">
+                <option value="auto">auto (Default)</option>
+                <option value="repeat(2, 100px)">repeat(2, 100px)</option>
+                <option value="50px 1fr 50px">50px 1fr 50px</option>
+                <option value="none">none (implicit rows)</option>
+                <option value="custom">Custom...</option>
+            </select>
+            <input type="text" id="grid-rows-custom" placeholder="e.g., 100px auto" style="display:none; width: 150px;">
+            <br>
+            <label for="grid-column-gap-input">column-gap:</label>
+            <input type="text" id="grid-column-gap-input" value="10px" style="width:80px;">
+            <label for="grid-row-gap-input">row-gap:</label>
+            <input type="text" id="grid-row-gap-input" value="10px" style="width:80px;">
+            <br>
+            <label for="grid-auto-flow-select">grid-auto-flow:</label>
+            <select id="grid-auto-flow-select">
+                <option value="row">row (default)</option>
+                <option value="column">column</option>
+                <option value="row dense">row dense</option>
+                <option value="column dense">column dense</option>
+            </select>
+        </div>
+        <div class="demo-area">
+            <div class="grid-container" id="grid-container-target">
+                <div class="grid-item" data-item-index="0">1</div>
+                <div class="grid-item" data-item-index="1">2</div>
+                <div class="grid-item" data-item-index="2">3</div>
+                <div class="grid-item" data-item-index="3">4</div>
+                <div class="grid-item" data-item-index="4">5</div>
+                <div class="grid-item" data-item-index="5">6</div>
+            </div>
+        </div>
+        <pre id="grid-container-css-output">/* Grid container styles will appear here */</pre>
+
+        <h3>Grid Item Properties (applied to selected item - default Item 1)</h3>
+        <div class="controls">
+            <label for="grid-item-select-target">Target Item:</label>
+            <select id="grid-item-select-target">
+                <option value="0">Item 1</option>
+                <option value="1">Item 2</option>
+                <option value="2">Item 3</option>
+                <option value="3">Item 4</option>
+                <option value="4">Item 5</option>
+                <option value="5">Item 6</option>
+            </select>
+            <br>
+            <label for="grid-col-start-input">grid-column-start:</label>
+            <input type="number" id="grid-col-start-input" min="1" style="width:60px;" placeholder="auto">
+            <label for="grid-col-end-select">grid-column-end:</label>
+            <select id="grid-col-end-select">
+                <option value="">auto</option>
+                <option value="span 1">span 1</option>
+                <option value="span 2">span 2</option>
+                <option value="span 3">span 3</option>
+                <option value="line">Line #...</option>
+            </select>
+            <input type="number" id="grid-col-end-line" min="1" style="width:60px; display:none;" placeholder="auto">
+            <br>
+            <label for="grid-row-start-input">grid-row-start:</label>
+            <input type="number" id="grid-row-start-input" min="1" style="width:60px;" placeholder="auto">
+            <label for="grid-row-end-select">grid-row-end:</label>
+            <select id="grid-row-end-select">
+                <option value="">auto</option>
+                <option value="span 1">span 1</option>
+                <option value="span 2">span 2</option>
+                <option value="span 3">span 3</option>
+                <option value="line">Line #...</option>
+            </select>
+            <input type="number" id="grid-row-end-line" min="1" style="width:60px; display:none;" placeholder="auto">
+            <br>
+            <label for="grid-item-justify-self-select">justify-self:</label>
+            <select id="grid-item-justify-self-select">
+                <option value="auto">auto (default: stretch)</option>
+                <option value="start">start</option>
+                <option value="end">end</option>
+                <option value="center">center</option>
+                <option value="stretch">stretch</option>
+            </select>
+            <label for="grid-item-align-self-select">align-self:</label>
+            <select id="grid-item-align-self-select">
+                <option value="auto">auto (default: stretch)</option>
+                <option value="start">start</option>
+                <option value="end">end</option>
+                <option value="center">center</option>
+                <option value="stretch">stretch</option>
+            </select>
+        </div>
+        <pre id="grid-item-css-output">/* Grid item styles will appear here */</pre>
+    </section>
+
+    <!-- Box Model Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="box-model-properties">
+        <h2>Box Model Properties</h2>
+        <div class="controls">
+            <label for="width-input">width:</label> <input type="text" id="width-input" value="100px">
+            <label for="height-input">height:</label> <input type="text" id="height-input" value="100px">
+            <label for="padding-input">padding:</label> <input type="text" id="padding-input" value="10px">
+            <label for="margin-input">margin:</label> <input type="text" id="margin-input" value="10px">
+            <br>
+            <label for="border-input">border:</label> <input type="text" id="border-input" value="2px solid darkred">
+            <label for="box-sizing-select">box-sizing:</label>
+            <select id="box-sizing-select">
+                <option value="content-box">content-box (default)</option>
+                <option value="border-box">border-box</option>
+            </select>
+            <label for="box-shadow-input">box-shadow:</label>
+            <input type="text" id="box-shadow-input" value="none" placeholder="e.g., 5px 5px 10px #888">
+        </div>
+        <div class="demo-area" id="box-model-demo-area" style="background: #eee;">
+            <div class="target-element" id="box-model-target" style="background: lightseagreen;">Box</div>
+        </div>
+        <pre id="box-model-css-output">/* Box model styles will appear here */</pre>
+    </section>
+
+    <!-- Background Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="background-properties">
+        <h2>Background Properties</h2>
+        <div class="controls">
+            <label for="bg-color-input">background-color:</label>
+            <input type="color" id="bg-color-input" value="#add8e6">
+            <label for="bg-image-input">background-image (URL):</label>
+            <input type="text" id="bg-image-input" value="url('https://picsum.photos/id/10/50/50')" placeholder="url(...) or none">
+            <br>
+            <label for="bg-repeat-select">background-repeat:</label>
+            <select id="bg-repeat-select">
+                <option value="repeat">repeat</option>
+                <option value="no-repeat">no-repeat</option>
+                <option value="repeat-x">repeat-x</option>
+                <option value="repeat-y">repeat-y</option>
+            </select>
+            <label for="bg-position-input">background-position:</label>
+            <input type="text" id="bg-position-input" value="center" placeholder="e.g., center, top left, 50% 50%">
+            <label for="bg-size-input">background-size:</label>
+            <input type="text" id="bg-size-input" value="auto" placeholder="e.g., auto, cover, contain, 50px 50%">
+        </div>
+        <div class="demo-area" style="height: 200px;">
+            <div id="background-target" style="width:100%; height:100%; border:1px solid black;"></div>
+        </div>
+        <pre id="background-css-output">/* Background styles will appear here */</pre>
+    </section>
+
+    <!-- Font Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="font-properties">
+        <h2>Font Properties</h2>
+        <div class="controls">
+            <label for="font-family-input">font-family:</label>
+            <input type="text" id="font-family-input" value="Arial, sans-serif">
+            <label for="font-size-input">font-size:</label>
+            <input type="text" id="font-size-input" value="16px">
+            <br>
+            <label for="font-weight-select">font-weight:</label>
+            <select id="font-weight-select">
+                <option value="normal">normal</option>
+                <option value="bold">bold</option>
+                <option value="bolder">bolder</option>
+                <option value="lighter">lighter</option>
+                <option value="400">400 (normal)</option>
+                <option value="700">700 (bold)</option>
+            </select>
+            <label for="font-style-select">font-style:</label>
+            <select id="font-style-select">
+                <option value="normal">normal</option>
+                <option value="italic">italic</option>
+                <option value="oblique">oblique</option>
+            </select>
+            <label for="line-height-input">line-height:</label>
+            <input type="text" id="line-height-input" value="1.6">
+        </div>
+        <div class="demo-area">
+            <p id="font-target" class="target-text">The quick brown fox jumps over the lazy dog.</p>
+        </div>
+        <pre id="font-css-output">/* Font styles will appear here */</pre>
+    </section>
+
+    <!-- Animation Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="animation-properties">
+        <h2>Animation Properties</h2>
+        <style>
+            @keyframes exampleAnimation {
+                0%   {background-color: lightcoral; left:0px; top:0px; transform: scale(1) rotate(0deg);}
+                25%  {background-color: yellow; left:50px; top:0px; transform: scale(1.2) rotate(90deg);}
+                50%  {background-color: lightblue; left:50px; top:50px; transform: scale(1) rotate(180deg);}
+                75%  {background-color: lightgreen; left:0px; top:50px; transform: scale(0.8) rotate(270deg);}
+                100% {background-color: lightcoral; left:0px; top:0px; transform: scale(1) rotate(360deg);}
+            }
+            .animated-element {
+                position: relative;
+            }
+        </style>
+        <div class="controls">
+            <label for="anim-duration-input">animation-duration:</label>
+            <input type="text" id="anim-duration-input" value="4s">
+            <label for="anim-timing-select">animation-timing-function:</label>
+            <select id="anim-timing-select">
+                <option value="linear">linear</option>
+                <option value="ease">ease</option>
+                <option value="ease-in">ease-in</option>
+                <option value="ease-out">ease-out</option>
+                <option value="ease-in-out">ease-in-out</option>
+            </select>
+            <br>
+            <label for="anim-iteration-select">animation-iteration-count:</label>
+            <select id="anim-iteration-select">
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="infinite">infinite</option>
+            </select>
+            <button id="restart-animation-btn">Restart Animation</button>
+        </div>
+        <div class="demo-area">
+            <div class="target-element animated-element" id="animation-target">Animate Me</div>
+        </div>
+        <pre id="animation-css-output">/* Animation styles will appear here */</pre>
+    </section>
+
+    <!-- Transition Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="transition-properties">
+        <h2>Transition Properties (hover over the box)</h2>
+        <style>
+            #transition-target-element {
+                background-color: lightcoral;
+                width: 100px;
+                height: 100px;
+            }
+            #transition-target-element:hover {
+                background-color: lightskyblue;
+                transform: scale(1.2) rotate(15deg);
+                border-radius: 50%;
+            }
+        </style>
+        <div class="controls">
+            <label for="trans-property-input">transition-property:</label>
+            <input type="text" id="trans-property-input" value="all">
+            <label for="trans-duration-input">transition-duration:</label>
+            <input type="text" id="trans-duration-input" value="0.5s">
+            <br>
+            <label for="trans-timing-select">transition-timing-function:</label>
+            <select id="trans-timing-select">
+                <option value="ease">ease</option>
+                <option value="linear">linear</option>
+                <option value="ease-in">ease-in</option>
+                <option value="ease-out">ease-out</option>
+                <option value="ease-in-out">ease-in-out</option>
+            </select>
+            <label for="trans-delay-input">transition-delay:</label>
+            <input type="text" id="trans-delay-input" value="0s">
+        </div>
+        <div class="demo-area">
+            <div class="target-element" id="transition-target-element">Hover Me</div>
+        </div>
+        <pre id="transition-css-output">/* Transition styles will appear here */</pre>
+    </section>
+
+    <!-- Filter Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="filter-properties">
+        <h2>Filter Properties</h2>
+        <h3>Filter</h3>
+        <div class="controls">
+            <label for="filter-select">filter:</label>
+            <select id="filter-select">
+                <option value="none">none</option>
+                <option value="blur(5px)">blur(5px)</option>
+                <option value="brightness(150%)">brightness(150%)</option>
+                <option value="contrast(200%)">contrast(200%)</option>
+                <option value="grayscale(100%)">grayscale(100%)</option>
+                <option value="hue-rotate(90deg)">hue-rotate(90deg)</option>
+                <option value="invert(100%)">invert(100%)</option>
+                <option value="opacity(50%)">opacity(50%)</option>
+                <option value="saturate(200%)">saturate(200%)</option>
+                <option value="sepia(100%)">sepia(100%)</option>
+                <option value="drop-shadow(8px 8px 10px gray)">drop-shadow(8px 8px 10px gray)</option>
+            </select>
+        </div>
+        <div class="demo-area filter-target">
+            <img id="filter-image-target" src="https://picsum.photos/id/1025/200/150" alt="Dog">
+        </div>
+        <pre id="filter-css-output">filter: none;</pre>
+
+        <h3>Backdrop Filter</h3>
+        <div class="controls">
+            <label for="backdrop-filter-select">backdrop-filter:</label>
+            <select id="backdrop-filter-select">
+                <option value="none">none</option>
+                <option value="blur(5px)">blur(5px)</option>
+                <option value="brightness(150%)">brightness(150%)</option>
+                <option value="grayscale(50%)">grayscale(50%)</option>
+            </select>
+        </div>
+        <div class="demo-area backdrop-filter-demo">
+            <div class="backdrop-filter-element" id="backdrop-filter-target">
+                Frosted Glass Effect
+            </div>
+        </div>
+        <pre id="backdrop-filter-css-output">backdrop-filter: none;</pre>
+    </section>
+
+    <!-- Pseudo-classes (Full HTML from previous correct version) -->
+    <section class="property-group" id="pseudo-classes">
+        <h2>Pseudo-classes</h2>
+        <p>Pseudo-classes select elements based on their state, characteristics, or relation to other elements. Interact with the examples below.</p>
+
+        <div class="pseudo-class-example">
+            <h4>:hover</h4>
+            <p>Applies when the mouse pointer is over an element.</p>
+            <div class="demo-box hover-box">Hover over me!</div>
+            <pre class="code-display">.hover-box:hover { background-color: #ffd700; color: black; }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:active</h4>
+            <p>Applies when an element is being activated (e.g., a button being clicked).</p>
+            <button class="active-button">Click and Hold Me</button>
+            <pre class="code-display">.active-button:active { background-color: #ff8c00; transform: scale(0.95); }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:focus</h4>
+            <p>Applies when an element has received focus (e.g., by clicking or tabbing to an input field).</p>
+            <input type="text" class="focus-input" placeholder="Click or Tab to me">
+            <pre class="code-display">.focus-input:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,.5); }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:checked</h4>
+            <p>Applies to radio buttons, checkboxes, and options in a select that are selected/checked.</p>
+            <input type="checkbox" id="check-example" class="check-me">
+            <label for="check-example">Check this box</label>
+            <pre class="code-display">.check-me:checked + label { color: #28a745; font-weight: bold; }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:disabled & :enabled</h4>
+            <p>:disabled applies to UI elements that are in a disabled state. :enabled applies to those that are not.</p>
+            <button class="disabled-button" disabled>I'm Disabled</button>
+            <button class="enabled-button">I'm Enabled</button>
+            <pre class="code-display">.disabled-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: #ccc; }
+.enabled-button:enabled { background-color: #28a745; color: white; }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:nth-child(n)</h4>
+            <p>Selects elements based on their position among siblings. Here, odd/even list items.</p>
+            <ul class="nth-list-demo"><li>Item 1 (odd)</li><li>Item 2 (even)</li><li>Item 3 (odd)</li><li>Item 4 (even)</li></ul>
+            <pre class="code-display">.nth-list-demo li:nth-child(odd) { background-color: #e9ecef; }
+.nth-list-demo li:nth-child(even) { background-color: #ced4da; }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:first-child & :last-child</h4>
+            <p>:first-child selects the first child element of its parent. :last-child selects the last.</p>
+            <div class="first-child-demo"><p>First Paragraph (styled)</p><p>Second Paragraph</p></div>
+            <div class="last-child-demo"><p>First Paragraph</p><p>Last Paragraph (styled)</p></div>
+            <pre class="code-display">.first-child-demo p:first-child { color: #dc3545; font-weight: bold; }
+.last-child-demo p:last-child { color: #17a2b8; font-style: italic; }</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:empty</h4>
+            <p>Selects elements that have no children (including text nodes).</p>
+            <div class="empty-div-demo"><div></div><div style="padding: 5px;">Not empty</div></div>
+            <pre class="code-display">.empty-div-demo div:empty {
+  height: 30px; background-color: #ffc107; 
+  border: 1px dashed #c89300; 
+}
+.empty-div-demo div:empty::before { 
+  content: "I'm empty (styled by :empty)!"; 
+  display:flex; align-items:center; justify-content:center; 
+  color: #555; width:100%; height:100%;
+}</pre>
+        </div>
+
+        <div class="pseudo-class-example">
+            <h4>:target</h4>
+            <p>Selects the element that is the target of the current URL fragment.</p>
+            <a href="#target-section1">Go to Target Section 1</a> |
+            <a href="#target-section2">Go to Target Section 2</a>
+            <div id="target-section1" class="target-demo-section demo-box">This is Target Section 1.</div>
+            <div id="target-section2" class="target-demo-section demo-box">This is Target Section 2.</div>
+            <pre class="code-display">.target-demo-section:target { background-color: #cfe2ff; border-left: 5px solid #0d6efd; }</pre>
+        </div>
+        <div class="pseudo-class-example">
+            <h4>:link & :visited</h4>
+            <p>:link applies to unvisited links. :visited applies to links that have been visited by the user.</p>
+            <div class="link-demo">
+                <a href="https://www.example.com" target="_blank">Example Link (unvisited style)</a><br>
+                <a href="#"># (visited style if you click it)</a>
+            </div>
+            <pre class="code-display">.link-demo a:link { color: #0d6efd; }
+.link-demo a:visited { color: #6f42c1; }</pre>
+        </div>
+    </section>
+
+    <!-- Pseudo-elements (Full HTML from previous correct version) -->
+    <section class="property-group" id="pseudo-elements">
+        <h2>Pseudo-elements</h2>
+        <p>Pseudo-elements create abstract elements that are not directly in the document tree, allowing styling of specific parts of an element.</p>
+
+        <div class="pseudo-element-example">
+            <h4>::before & ::after</h4>
+            <p>Create pseudo-elements as the first and last child of the selected element, respectively. Requires the `content` property.</p>
+            <div class="demo-text-block before-after-demo">This is the main content.</div>
+            <pre class="code-display">.before-after-demo::before {
+  content: "« Start | "; color: #007bff; font-weight: bold;
+}
+.before-after-demo::after {
+  content: " | End »"; color: #007bff; font-weight: bold;
+}</pre>
+        </div>
+
+        <div class="pseudo-element-example">
+            <h4>::first-letter</h4>
+            <p>Applies styles to the first letter of the first line of a block-level element.</p>
+            <div class="first-letter-demo"><p class="demo-text-block">The first letter of this paragraph will be styled.</p></div>
+            <pre class="code-display">.first-letter-demo p::first-letter {
+  font-size: 2.5em; color: #dc3545; float: left;
+}</pre>
+        </div>
+
+        <div class="pseudo-element-example">
+            <h4>::first-line</h4>
+            <p>Applies styles to the first line of a block-level element.</p>
+            <div class="first-line-demo"><p class="demo-text-block">The first line of this paragraph will be styled. If the text wraps to a new line, only the very first formatted line gets the style.</p></div>
+            <pre class="code-display">.first-line-demo p::first-line {
+  color: #198754; font-weight: bold;
+}</pre>
+        </div>
+
+        <div class="pseudo-element-example">
+            <h4>::selection</h4>
+            <p>Applies styles to the portion of a document that has been highlighted by the user (e.g., by clicking and dragging the mouse).</p>
+            <div class="selection-demo"><p class="demo-text-block">Try selecting some of this text.</p></div>
+            <pre class="code-display">.selection-demo p::selection {
+  background-color: #ffc107; color: #000;
+}</pre>
+        </div>
+
+        <div class="pseudo-element-example">
+            <h4>::marker</h4>
+            <p>Styles the marker box of a list item (e.g., bullets or numbers).</p>
+            <ul class="marker-demo demo-text-block" style="list-style-position: inside;">
+                <li>First item with custom marker</li>
+                <li>Second item with custom marker</li>
+            </ul>
+            <pre class="code-display">/* Note: For ::marker to be highly customizable, list-style-position might be needed. */
+.marker-demo li::marker {
+  content: "► ";
+  color: #6f42c1;
+  font-size: 1.2em;
+}</pre>
+        </div>
+
+        <div class="pseudo-element-example">
+            <h4>::placeholder</h4>
+            <p>Styles the placeholder text in an input or textarea element.</p>
+            <div class="placeholder-demo">
+                <input type="text" placeholder="I am placeholder text..." class="demo-text-block" style="width: 80%;">
+            </div>
+            <pre class="code-display">.placeholder-demo input::placeholder {
+  color: #fd7e14;
+  font-style: italic;
+}</pre>
+        </div>
+    </section>
+
+    <!-- Other Common Properties (Full HTML from previous correct version) -->
+    <section class="property-group" id="other-common-properties">
+        <h2>Other Common Properties</h2>
+        <h3>Cursor</h3>
+        <div class="controls">
+            <label for="cursor-select">cursor:</label>
+            <select id="cursor-select">
+                <option value="auto">auto</option>
+                <option value="default">default</option>
+                <option value="pointer">pointer</option>
+                <option value="wait">wait</option>
+                <option value="text">text</option>
+                <option value="move">move</option>
+                <option value="not-allowed">not-allowed</option>
+                <option value="help">help</option>
+                <option value="crosshair">crosshair</option>
+            </select>
+        </div>
+        <div class="demo-area" id="cursor-demo-area" style="height: 50px; background: #fafafa; text-align:center; padding-top:15px;">
+            Hover over this area to see cursor.
+        </div>
+        <pre id="cursor-css-output">cursor: auto;</pre>
+
+        <h3>Opacity</h3>
+        <div class="controls">
+            <label for="opacity-range">opacity: <span id="opacity-value-span">1</span></label>
+            <input type="range" id="opacity-range" min="0" max="1" step="0.1" value="1">
+        </div>
+        <div class="demo-area">
+            <div class="target-element" id="opacity-target">Opacity Target</div>
+        </div>
+        <pre id="opacity-css-output">opacity: 1;</pre>
+    </section>
+
+    <!-- JS DOM Manipulation Section (REVISED HTML FOR SIMPLICITY) -->
+    <section class="property-group" id="js-dom-manipulation">
+        <h2>JavaScript DOM Manipulation</h2>
+        <p>This section demonstrates common JavaScript DOM operations. The primary target is the blue box below. You can also use the selector to target other elements within the blue box for some actions.</p>
+
+        <div id="js-dom-demo-container">
+            <div id="js-dom-main-target">
+                I am the main target (ID: js-dom-main-target).
+                <p id="js-child-p1">Child Paragraph 1</p>
+                <p id="js-child-p2">Child Paragraph 2</p>
+            </div>
+        </div>
+        <div id="dom-message-area">Messages about DOM operations will appear here.</div>
+        <pre id="dom-js-code-output">/* JavaScript code for the action will appear here */</pre>
+
+        <div class="controls">
+            <div class="js-dom-action-group">
+                <h4>1. Selecting Elements</h4>
+                <label for="dom-selector">CSS Selector (targets within blue box):</label>
+                <input type="text" id="dom-selector" value="#js-child-p1" placeholder="e.g., #js-child-p1, p">
+                <button id="dom-select-btn">Highlight Selected</button>
+                <button id="dom-clear-highlight-btn">Clear Highlights</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>2. Modifying Content of <code>#js-dom-main-target</code></h4>
+                <label for="dom-main-textcontent">New textContent:</label>
+                <input type="text" id="dom-main-textcontent" value="Main Target Text Updated!">
+                <button id="dom-set-main-textcontent-btn">Set Text</button>
+                <br>
+                <label for="dom-main-innerhtml">New innerHTML (use with caution):</label>
+                <input type="text" id="dom-main-innerhtml" value="New <strong>HTML</strong> content!">
+                <button id="dom-set-main-innerhtml-btn">Set HTML</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>3. Creating & Adding Elements to <code>#js-dom-main-target</code></h4>
+                <label for="dom-create-tag">Tag:</label>
+                <input type="text" id="dom-create-tag" value="div" style="width:60px;">
+                <label for="dom-create-text">Text:</label>
+                <input type="text" id="dom-create-text" value="Appended Div">
+                <button id="dom-main-append-btn">Append</button>
+                <button id="dom-main-prepend-btn">Prepend</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>4. Modifying Attributes of <code>#js-dom-main-target</code></h4>
+                <label for="dom-main-attr-name">Attribute:</label>
+                <input type="text" id="dom-main-attr-name" value="data-info" style="width:100px;">
+                <label for="dom-main-attr-value">Value:</label>
+                <input type="text" id="dom-main-attr-value" value="important-data" style="width:120px;">
+                <button id="dom-main-set-attr-btn">Set</button>
+                <button id="dom-main-get-attr-btn">Get</button>
+                <button id="dom-main-remove-attr-btn">Remove</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>5. Modifying Styles of <code>#js-dom-main-target</code></h4>
+                <label for="dom-main-style-prop">Property (camelCase):</label>
+                <input type="text" id="dom-main-style-prop" value="backgroundColor" style="width:120px;">
+                <label for="dom-main-style-value">Value:</label>
+                <input type="text" id="dom-main-style-value" value="lightgreen" style="width:100px;">
+                <button id="dom-main-set-style-btn">Set Style</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>6. Modifying Classes of <code>#js-dom-main-target</code></h4>
+                <label for="dom-main-class-name">Class Name:</label>
+                <input type="text" id="dom-main-class-name" value="js-highlight" style="width:120px;">
+                <button id="dom-main-add-class-btn">Add</button>
+                <button id="dom-main-remove-class-btn">Remove</button>
+                <button id="dom-main-toggle-class-btn">Toggle</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>7. Removing Elements</h4>
+                <p>To remove elements, first select them using the "Selecting Elements" controls above, then click remove.</p>
+                <button id="dom-remove-selected-btn">Remove Highlighted Elements</button>
+            </div>
+
+            <div class="js-dom-action-group">
+                <h4>8. Event Listeners on <code>#js-dom-main-target</code></h4>
+                <button id="dom-main-add-listener-btn">Add Click Listener</button>
+                <button id="dom-main-remove-listener-btn">Remove Click Listener</button>
+                <p style="font-size:0.9em; margin-top:5px;"><i>(Click listener logs to console and updates message/code area.)</i></p>
+            </div>
+        </div>
+    </section>
+
+</div> <!-- end .container -->
+
+<script>
+    // Helper functions
+    function $(selector) { return document.querySelector(selector); }
+    function $all(selector) { return document.querySelectorAll(selector); }
+
+    // Main Navigation Logic
+    const mainNavSelect = $('#property-category-select');
+    const propertyGroups = $all('.property-group');
+    const instructionsP = $('#instructions');
+
+    propertyGroups.forEach(group => {
+        const title = group.querySelector('h2').textContent;
+        const option = document.createElement('option');
+        option.value = group.id;
+        option.textContent = title;
+        mainNavSelect.appendChild(option);
+    });
+
+    mainNavSelect.addEventListener('change', function() {
+        const selectedGroupId = this.value;
+        propertyGroups.forEach(group => {
+            group.classList.toggle('active', group.id === selectedGroupId);
+        });
+        instructionsP.style.display = selectedGroupId ? 'none' : 'block';
+        if (selectedGroupId === 'js-dom-manipulation') {
+            initializeDomDemo();
+        }
+    });
+
+    // CSS update functions
+    function updateStyle(target, property, value, outputElement) {
+        if (typeof target === 'string') target = $(target);
+        if (!target) return;
+        target.style[property] = value;
+        if (outputElement) {
+            let currentOutput = (outputElement.textContent.split(';\n').filter(s => s.trim() && !s.startsWith(property + ':')) || []);
+            if (value || value === 0 || value === '') {
+                currentOutput.push(`${property}: ${value}`);
+            }
+            outputElement.textContent = currentOutput.filter(s => s.endsWith(';') ? s : s+';').join('\n');
+            if (!outputElement.textContent.trim()) outputElement.textContent = "/* No specific styles applied */";
+        }
+    }
+
+    function updateElementStyle(element, styles, outputElement) {
+        if (!element) return;
+        let cssText = '';
+        for (const prop in styles) {
+            const kebabProp = prop.replace(/([A-Z])/g, "-$1").toLowerCase();
+            if (styles[prop] || styles[prop] === 0 || styles[prop] === '') {
+                element.style[kebabProp] = styles[prop];
+                if (styles[prop] !== '') {
+                    cssText += `${kebabProp}: ${styles[prop]};\n`;
+                }
+            } else {
+                element.style[kebabProp] = '';
+            }
+        }
+        if (outputElement) outputElement.textContent = cssText.trim() ? cssText : "/* No specific styles applied */";
+    }
+
+    // --- CSS Property Sections Logic ---
+    // Transform
+    const transformTarget = $('#transform-target');
+    const transformSelect = $('#transform-select');
+    const transformOriginInput = $('#transform-origin-input');
+    const perspectiveInput = $('#perspective-input');
+    const transformDemoArea = $('#transform-demo-area');
+    const transformCssOutput = $('#transform-css-output');
+    function applyTransform() {
+        if (!transformTarget || !transformDemoArea || !transformCssOutput || !transformSelect || !transformOriginInput || !perspectiveInput) return;
+        const transformValue = transformSelect.value;
+        const originValue = transformOriginInput.value || 'center center';
+        const perspectiveValue = perspectiveInput.value || 'none';
+        transformTarget.style.transform = transformValue;
+        transformTarget.style.transformOrigin = originValue;
+        transformDemoArea.style.perspective = (transformValue.includes('3d') || transformValue.includes('rotateX') || transformValue.includes('rotateY') || transformValue.includes('translateZ')) ? perspectiveValue : 'none';
+        let output = `transform: ${transformValue};\ntransform-origin: ${originValue};`;
+        if (transformDemoArea.style.perspective !== 'none' && transformDemoArea.style.perspective !== '') {
+            output += `\n/* On Parent: */\nperspective: ${perspectiveValue};`;
+        }
+        transformCssOutput.textContent = output;
+    }
+    if (transformSelect) {
+        [transformSelect, transformOriginInput, perspectiveInput].forEach(el => { if(el) el.addEventListener('input', applyTransform) });
+        applyTransform();
+    }
+
+    // Text Properties
+    const textTarget = $('#text-target');
+    const textCssOutput = $('#text-css-output');
+    const textControls = {
+        'text-align': $('#text-align-select'), 'text-decoration': $('#text-decoration-select'),
+        'text-transform': $('#text-transform-select'), 'text-indent': $('#text-indent-input'),
+        'text-shadow': $('#text-shadow-input')
+    };
+    function applyTextStyles() {
+        if (!textTarget || !textCssOutput) return;
+        let cssString = "";
+        for (const prop in textControls) {
+            if (textControls[prop]) {
+                textTarget.style[prop.replace(/-([a-z])/g, g => g[1].toUpperCase())] = textControls[prop].value;
+                cssString += `${prop}: ${textControls[prop].value};\n`;
+            }
+        }
+        textCssOutput.textContent = cssString.trim() ? cssString : "/* No text styles applied */";
+    }
+    if (textTarget) {
+        Object.values(textControls).forEach(control => { if (control) control.addEventListener('input', applyTextStyles); });
+        applyTextStyles();
+    }
+
+    // Display Property
+    const displaySelectForLogic = $('#display-select');
+    const displayTarget1 = $('#display-target1');
+    const displayTarget2 = $('#display-target2');
+    const displayCssOutputForLogic = $('#display-css-output');
+    if (displaySelectForLogic && displayTarget1 && displayTarget2 && displayCssOutputForLogic) {
+        const displayDemoAreaParent = displayTarget1.closest('.demo-area');
+        let clarificationNote = null;
+        if (displayDemoAreaParent) {
+            clarificationNote = displayDemoAreaParent.querySelector('.clarification-note');
+            if (!clarificationNote) {
+                clarificationNote = document.createElement('p');
+                clarificationNote.className = 'clarification-note';
+                Object.assign(clarificationNote.style, { fontSize: '0.9em', fontStyle: 'italic', marginTop: '10px', textAlign: 'left', width: '100%', display: 'none', color: '#555' });
+                const preElement = displayDemoAreaParent.querySelector('pre');
+                displayDemoAreaParent.insertBefore(clarificationNote, preElement || null);
+            }
+        }
+        function handleDisplayChange() {
+            const selectedDisplay = displaySelectForLogic.value;
+            displayTarget1.style.display = selectedDisplay;
+            displayTarget2.style.display = selectedDisplay;
+            displayCssOutputForLogic.textContent = `#display-target1, #display-target2 {\n  display: ${selectedDisplay};\n}`;
+            if (clarificationNote) {
+                const isFlexOrGrid = selectedDisplay === 'flex' || selectedDisplay === 'grid';
+                clarificationNote.innerHTML = isFlexOrGrid ? `Note: Item 1 and Item 2 are now <strong>${selectedDisplay} containers</strong>. They behave as block-level elements within this demo. To see how items are arranged <em>inside</em> a ${selectedDisplay} container and control container properties, please see the dedicated "Flexbox Properties" or "Grid Properties" sections.` : '';
+                clarificationNote.style.display = isFlexOrGrid ? 'block' : 'none';
+            }
+        }
+        displaySelectForLogic.addEventListener('change', handleDisplayChange);
+        handleDisplayChange();
+    }
+
+    // Position Property
+    const positionSelect = $('#position-select');
+    const positionTarget = $('#position-target');
+    const positionTopInput = $('#position-top');
+    const positionLeftInput = $('#position-left');
+    const positionCssOutput = $('#position-css-output');
+    function applyPosition() {
+        if(!positionTarget || !positionSelect || !positionTopInput || !positionLeftInput || !positionCssOutput) return;
+        const pos = positionSelect.value;
+        const topVal = positionTopInput.value;
+        const leftVal = positionLeftInput.value;
+        Object.assign(positionTarget.style, { position: pos, top: topVal || 'auto', left: leftVal || 'auto' });
+        if (pos === 'sticky' && !topVal) positionTarget.style.top = '0px';
+        positionCssOutput.textContent = `position: ${positionTarget.style.position};\ntop: ${positionTarget.style.top};\nleft: ${positionTarget.style.left};`;
+    }
+    if(positionSelect) {
+        [positionSelect, positionTopInput, positionLeftInput].forEach(el => { if(el) el.addEventListener('input', applyPosition) });
+        applyPosition();
+    }
+
+    // Overflow Property
+    const overflowSelect = $('#overflow-select');
+    const overflowDemoAreaForJS = $('#overflow-demo-area');
+    const overflowCssOutput = $('#overflow-css-output');
+    if (overflowSelect && overflowDemoAreaForJS && overflowCssOutput) {
+        overflowSelect.addEventListener('change', function() {
+            overflowDemoAreaForJS.style.overflow = this.value;
+            overflowCssOutput.textContent = `/* On demo-area container (#overflow-demo-area): */\noverflow: ${this.value};`;
+        });
+        overflowDemoAreaForJS.style.overflow = overflowSelect.value;
+        overflowCssOutput.textContent = `/* On demo-area container (#overflow-demo-area): */\noverflow: ${overflowSelect.value};`;
+    }
+
+    // Flexbox Container
+    const flexContainerTarget = $('#flex-container-target');
+    const flexContainerCssOutput = $('#flex-container-css-output');
+    const flexContainerControls = {
+        'flexDirection': $('#flex-direction-select'), 'justifyContent': $('#justify-content-select'),
+        'alignItems': $('#align-items-select'), 'flexWrap': $('#flex-wrap-select')
+    };
+    function applyFlexContainerStyles() {
+        if(!flexContainerTarget || !flexContainerCssOutput) return;
+        let styles = {};
+        for (const prop in flexContainerControls) if(flexContainerControls[prop]) styles[prop] = flexContainerControls[prop].value;
+        updateElementStyle(flexContainerTarget, styles, flexContainerCssOutput);
+    }
+    if(flexContainerTarget) {
+        Object.values(flexContainerControls).forEach(c => { if(c) c.addEventListener('input', applyFlexContainerStyles) });
+        applyFlexContainerStyles();
+    }
+
+    // Flexbox Item
+    const flexItemSelectTarget = $('#flex-item-select-target');
+    const flexGrowRange = $('#flex-grow-range');
+    const flexGrowValueSpan = $('#flex-grow-value');
+    const flexShrinkRange = $('#flex-shrink-range');
+    const flexShrinkValueSpan = $('#flex-shrink-value');
+    const flexBasisSelect = $('#flex-basis-select');
+    const flexBasisCustomInput = $('#flex-basis-custom');
+    const flexItemAlignSelfSelect = $('#flex-item-align-self-select');
+    const flexItemOrderInput = $('#flex-item-order-input');
+    const flexItemCssOutput = $('#flex-item-css-output');
+    let currentFlexItemTarget = null;
+
+    function updateCurrentFlexItemTarget() {
+        if (!flexContainerTarget || !flexItemSelectTarget) return;
+        const selectedIndex = parseInt(flexItemSelectTarget.value);
+        currentFlexItemTarget = flexContainerTarget.querySelector(`.flex-item[data-item-index="${selectedIndex}"]`);
+        $all('#flex-container-target .flex-item').forEach(item => item.classList.remove('targeted'));
+        if(currentFlexItemTarget) currentFlexItemTarget.classList.add('targeted');
+        loadFlexItemControls();
+    }
+    function loadFlexItemControls() {
+        if (!currentFlexItemTarget || !flexGrowRange || !flexShrinkRange || !flexBasisSelect || !flexItemAlignSelfSelect || !flexItemOrderInput) return;
+        flexGrowRange.value = currentFlexItemTarget.style.flexGrow || '0';
+        if(flexGrowValueSpan) flexGrowValueSpan.textContent = flexGrowRange.value;
+        flexShrinkRange.value = currentFlexItemTarget.style.flexShrink || '1';
+        if(flexShrinkValueSpan) flexShrinkValueSpan.textContent = flexShrinkRange.value;
+        const basis = currentFlexItemTarget.style.flexBasis || 'auto';
+        let basisOptionFound = Array.from(flexBasisSelect.options).some(opt => opt.value === basis);
+        if (basisOptionFound) {
+            flexBasisSelect.value = basis;
+            flexBasisCustomInput.style.display = 'none';
+        } else if (basis && basis !== 'auto') {
+            flexBasisSelect.value = 'custom';
+            flexBasisCustomInput.value = basis;
+            flexBasisCustomInput.style.display = 'inline-block';
+        } else {
+            flexBasisSelect.value = 'auto';
+            flexBasisCustomInput.style.display = 'none';
+        }
+        flexItemAlignSelfSelect.value = currentFlexItemTarget.style.alignSelf || 'auto';
+        flexItemOrderInput.value = currentFlexItemTarget.style.order || '0';
+        applyFlexItemStyles();
+    }
+    function applyFlexItemStyles() {
+        if(!currentFlexItemTarget || !flexItemCssOutput || !flexGrowRange || !flexShrinkRange || !flexBasisSelect || !flexItemAlignSelfSelect || !flexItemOrderInput) return;
+        const grow = flexGrowRange.value;
+        const shrink = flexShrinkRange.value;
+        let basis = flexBasisSelect.value;
+        if (basis === 'custom' && flexBasisCustomInput) basis = flexBasisCustomInput.value || 'auto';
+        const alignSelf = flexItemAlignSelfSelect.value;
+        const order = flexItemOrderInput.value;
+        Object.assign(currentFlexItemTarget.style, { flexGrow: grow, flexShrink: shrink, flexBasis: basis, alignSelf: alignSelf, order: order });
+        if(flexGrowValueSpan) flexGrowValueSpan.textContent = grow;
+        if(flexShrinkValueSpan) flexShrinkValueSpan.textContent = shrink;
+        flexItemCssOutput.textContent = `/* Styles for Item ${parseInt(currentFlexItemTarget.dataset.itemIndex) + 1} */\nflex-grow: ${grow};\nflex-shrink: ${shrink};\nflex-basis: ${basis};\nalign-self: ${alignSelf};\norder: ${order};`;
+    }
+    if (flexItemSelectTarget) {
+        flexItemSelectTarget.addEventListener('change', updateCurrentFlexItemTarget);
+        [flexGrowRange, flexShrinkRange, flexBasisCustomInput, flexItemAlignSelfSelect, flexItemOrderInput].forEach(el => {
+            if(el) el.addEventListener('input', applyFlexItemStyles);
+        });
+        if (flexBasisSelect) {
+            flexBasisSelect.addEventListener('change', () => {
+                if (flexBasisCustomInput) flexBasisCustomInput.style.display = flexBasisSelect.value === 'custom' ? 'inline-block' : 'none';
+                if (flexBasisSelect.value === 'custom' && flexBasisCustomInput) flexBasisCustomInput.focus();
+                applyFlexItemStyles();
+            });
+        }
+        updateCurrentFlexItemTarget();
+    }
+
+    // Grid Container
+    const gridContainerTarget = $('#grid-container-target');
+    const gridContainerCssOutput = $('#grid-container-css-output');
+    const gridColsPatternSelect = $('#grid-cols-pattern-select');
+    const gridColsCustomInput = $('#grid-cols-custom');
+    const gridRowsPatternSelect = $('#grid-rows-pattern-select');
+    const gridRowsCustomInput = $('#grid-rows-custom');
+    const gridColGapInput = $('#grid-column-gap-input');
+    const gridRowGapInput = $('#grid-row-gap-input');
+    const gridAutoFlowSelect = $('#grid-auto-flow-select');
+    function applyGridContainerStyles() {
+        if(!gridContainerTarget || !gridContainerCssOutput) return;
+        let styles = {};
+        let colsValue = gridColsPatternSelect ? gridColsPatternSelect.value : 'repeat(3, 1fr)';
+        if (colsValue === 'custom' && gridColsCustomInput) colsValue = gridColsCustomInput.value || 'none';
+        styles.gridTemplateColumns = colsValue;
+        let rowsValue = gridRowsPatternSelect ? gridRowsPatternSelect.value : 'auto';
+        if (rowsValue === 'custom' && gridRowsCustomInput) rowsValue = gridRowsCustomInput.value || 'none';
+        styles.gridTemplateRows = rowsValue;
+        styles.columnGap = gridColGapInput ? gridColGapInput.value : '10px';
+        styles.rowGap = gridRowGapInput ? gridRowGapInput.value : '10px';
+        styles.gridAutoFlow = gridAutoFlowSelect ? gridAutoFlowSelect.value : 'row';
+        updateElementStyle(gridContainerTarget, styles, gridContainerCssOutput);
+    }
+    if(gridContainerTarget) {
+        [gridColsPatternSelect, gridColsCustomInput, gridRowsPatternSelect, gridRowsCustomInput, gridColGapInput, gridRowGapInput, gridAutoFlowSelect].forEach(control => {
+            if (control) {
+                control.addEventListener('input', applyGridContainerStyles);
+                if (control.tagName === 'SELECT') {
+                    control.addEventListener('change', () => {
+                        if(control.id === 'grid-cols-pattern-select' && gridColsCustomInput) gridColsCustomInput.style.display = control.value === 'custom' ? 'inline-block' : 'none';
+                        if(control.id === 'grid-rows-pattern-select' && gridRowsCustomInput) gridRowsCustomInput.style.display = control.value === 'custom' ? 'inline-block' : 'none';
+                        if (control.value === 'custom' && (control.id === 'grid-cols-pattern-select' || control.id === 'grid-rows-pattern-select') ) {
+                            (control.id === 'grid-cols-pattern-select' ? gridColsCustomInput : gridRowsCustomInput).focus();
+                        }
+                        applyGridContainerStyles();
+                    });
+                }
+            }
+        });
+        applyGridContainerStyles();
+    }
+
+    // Grid Item
+    const gridItemSelectTarget = $('#grid-item-select-target');
+    const gridColStartInput = $('#grid-col-start-input');
+    const gridColEndSelect = $('#grid-col-end-select');
+    const gridColEndLineInput = $('#grid-col-end-line');
+    const gridRowStartInput = $('#grid-row-start-input');
+    const gridRowEndSelect = $('#grid-row-end-select');
+    const gridRowEndLineInput = $('#grid-row-end-line');
+    const gridItemJustifySelfSelect = $('#grid-item-justify-self-select');
+    const gridItemAlignSelfSelect = $('#grid-item-align-self-select');
+    const gridItemCssOutput = $('#grid-item-css-output');
+    let currentGridItemTarget = null;
+
+    function updateCurrentGridItemTarget() {
+        if (!gridContainerTarget || !gridItemSelectTarget) return;
+        const selectedIndex = parseInt(gridItemSelectTarget.value);
+        currentGridItemTarget = gridContainerTarget.querySelector(`.grid-item[data-item-index="${selectedIndex}"]`);
+        $all('#grid-container-target .grid-item').forEach(item => item.classList.remove('targeted'));
+        if(currentGridItemTarget) currentGridItemTarget.classList.add('targeted');
+        loadGridItemControls();
+    }
+    function loadGridItemControls() {
+        if (!currentGridItemTarget || !gridColStartInput || !gridColEndSelect || !gridColEndLineInput || !gridRowStartInput || !gridRowEndSelect || !gridRowEndLineInput || !gridItemJustifySelfSelect || !gridItemAlignSelfSelect) return;
+        gridColStartInput.value = currentGridItemTarget.style.gridColumnStart || '';
+        const colEnd = currentGridItemTarget.style.gridColumnEnd || '';
+        if (colEnd.startsWith('span')) { gridColEndSelect.value = colEnd; gridColEndLineInput.style.display = 'none'; gridColEndLineInput.value = ''; }
+        else if (colEnd && !isNaN(parseInt(colEnd))) { gridColEndSelect.value = 'line'; gridColEndLineInput.value = colEnd; gridColEndLineInput.style.display = 'inline-block';}
+        else { gridColEndSelect.value = ''; gridColEndLineInput.style.display = 'none'; gridColEndLineInput.value = ''; }
+        gridRowStartInput.value = currentGridItemTarget.style.gridRowStart || '';
+        const rowEnd = currentGridItemTarget.style.gridRowEnd || '';
+        if (rowEnd.startsWith('span')) { gridRowEndSelect.value = rowEnd; gridRowEndLineInput.style.display = 'none'; gridRowEndLineInput.value = ''; }
+        else if (rowEnd && !isNaN(parseInt(rowEnd))) { gridRowEndSelect.value = 'line'; gridRowEndLineInput.value = rowEnd; gridRowEndLineInput.style.display = 'inline-block';}
+        else { gridRowEndSelect.value = ''; gridRowEndLineInput.style.display = 'none'; gridRowEndLineInput.value = ''; }
+        gridItemJustifySelfSelect.value = currentGridItemTarget.style.justifySelf || 'auto';
+        gridItemAlignSelfSelect.value = currentGridItemTarget.style.alignSelf || 'auto';
+        applyGridItemStyles();
+    }
+    function applyGridItemStyles() {
+        if(!currentGridItemTarget || !gridItemCssOutput || !gridColStartInput || !gridColEndSelect || !gridColEndLineInput || !gridRowStartInput || !gridRowEndSelect || !gridRowEndLineInput || !gridItemJustifySelfSelect || !gridItemAlignSelfSelect) return;
+        let stylesToApply = {
+            gridColumnStart: gridColStartInput.value,
+            gridColumnEnd: gridColEndSelect.value === 'line' ? (gridColEndLineInput.value || '') : gridColEndSelect.value,
+            gridRowStart: gridRowStartInput.value,
+            gridRowEnd: gridRowEndSelect.value === 'line' ? (gridRowEndLineInput.value || '') : gridRowEndSelect.value,
+            justifySelf: gridItemJustifySelfSelect.value,
+            alignSelf: gridItemAlignSelfSelect.value
+        };
+        const propsToClear = ['gridColumnStart', 'gridColumnEnd', 'gridRowStart', 'gridRowEnd', 'justifySelf', 'alignSelf'];
+        propsToClear.forEach(prop => currentGridItemTarget.style[prop] = '');
+
+        let cssTextOutput = `/* Styles for Item ${parseInt(currentGridItemTarget.dataset.itemIndex) + 1} */\n`;
+        for(const propCamelCase in stylesToApply) {
+            const propKebabCase = propCamelCase.replace(/([A-Z])/g, "-$1").toLowerCase();
+            if(stylesToApply[propCamelCase] && (stylesToApply[propCamelCase] !== 'auto' || !(propCamelCase === 'justifySelf' || propCamelCase === 'alignSelf'))) {
+                currentGridItemTarget.style[propKebabCase] = stylesToApply[propCamelCase];
+                cssTextOutput += `${propKebabCase}: ${stylesToApply[propCamelCase]};\n`;
+            } else if (stylesToApply[propCamelCase] === 'auto' && (propCamelCase === 'justifySelf' || propCamelCase === 'alignSelf')) {
+                currentGridItemTarget.style[propKebabCase] = 'auto';
+            }
+        }
+        gridItemCssOutput.textContent = cssTextOutput.includes(':') ? cssTextOutput : "/* No specific grid item placement styles applied */";
+    }
+    if(gridItemSelectTarget) {
+        gridItemSelectTarget.addEventListener('change', updateCurrentGridItemTarget);
+        [gridColStartInput, gridColEndLineInput, gridRowStartInput, gridRowEndLineInput, gridItemJustifySelfSelect, gridItemAlignSelfSelect].forEach(control => {
+            if (control) control.addEventListener('input', applyGridItemStyles);
+        });
+        [gridColEndSelect, gridRowEndSelect].forEach(select => {
+            if (select) {
+                select.addEventListener('change', () => {
+                    const lineInput = select.id === 'grid-col-end-select' ? gridColEndLineInput : gridRowEndLineInput;
+                    if (lineInput) lineInput.style.display = select.value === 'line' ? 'inline-block' : 'none';
+                    if (select.value === 'line' && lineInput) lineInput.focus();
+                    applyGridItemStyles();
+                });
+            }
+        });
+        updateCurrentGridItemTarget();
+    }
+
+    // Box Model
+    const boxModelTarget = $('#box-model-target');
+    const boxModelCssOutput = $('#box-model-css-output');
+    const boxModelControls = {
+        'width': $('#width-input'), 'height': $('#height-input'), 'padding': $('#padding-input'),
+        'margin': $('#margin-input'), 'border': $('#border-input'), 'boxSizing': $('#box-sizing-select'),
+        'boxShadow': $('#box-shadow-input')
+    };
+    function applyBoxModelStyles() {
+        if(!boxModelTarget || !boxModelCssOutput) return;
+        let styles = {};
+        for (const prop in boxModelControls) if(boxModelControls[prop]) styles[prop] = boxModelControls[prop].value;
+        updateElementStyle(boxModelTarget, styles, boxModelCssOutput);
+    }
+    if(boxModelTarget){
+        Object.values(boxModelControls).forEach(c => {if(c) c.addEventListener('input', applyBoxModelStyles)});
+        applyBoxModelStyles();
+    }
+
+    // Background
+    const backgroundTarget = $('#background-target');
+    const backgroundCssOutput = $('#background-css-output');
+    const backgroundControls = {
+        'backgroundColor': $('#bg-color-input'), 'backgroundImage': $('#bg-image-input'),
+        'backgroundRepeat': $('#bg-repeat-select'), 'backgroundPosition': $('#bg-position-input'),
+        'backgroundSize': $('#bg-size-input')
+    };
+    function applyBackgroundStyles() {
+        if(!backgroundTarget || !backgroundCssOutput) return;
+        let styles = {};
+        for (const prop in backgroundControls) if(backgroundControls[prop]) styles[prop] = backgroundControls[prop].value;
+        updateElementStyle(backgroundTarget, styles, backgroundCssOutput);
+    }
+    if(backgroundTarget){
+        Object.values(backgroundControls).forEach(c => {if(c) c.addEventListener('input', applyBackgroundStyles)});
+        applyBackgroundStyles();
+    }
+
+    // Font
+    const fontTarget = $('#font-target');
+    const fontCssOutput = $('#font-css-output');
+    const fontControls = {
+        'fontFamily': $('#font-family-input'), 'fontSize': $('#font-size-input'),
+        'fontWeight': $('#font-weight-select'), 'fontStyle': $('#font-style-select'),
+        'lineHeight': $('#line-height-input')
+    };
+    function applyFontStyles() {
+        if(!fontTarget || !fontCssOutput) return;
+        let styles = {};
+        for (const prop in fontControls) if(fontControls[prop]) styles[prop] = fontControls[prop].value;
+        updateElementStyle(fontTarget, styles, fontCssOutput);
+    }
+    if(fontTarget){
+        Object.values(fontControls).forEach(c => {if(c) c.addEventListener('input', applyFontStyles)});
+        applyFontStyles();
+    }
+
+    // Animation
+    const animationTarget = $('#animation-target');
+    const animationCssOutput = $('#animation-css-output');
+    const animationControls = {
+        'animationDuration': $('#anim-duration-input'), 'animationTimingFunction': $('#anim-timing-select'),
+        'animationIterationCount': $('#anim-iteration-select')
+    };
+    const restartAnimationBtn = $('#restart-animation-btn');
+    function applyAnimationStyles(isRestart = false) {
+        if (!animationTarget || !animationCssOutput ) return;
+        const styles = { animationName: 'exampleAnimation' };
+        for (const prop in animationControls) if (animationControls[prop]) styles[prop] = animationControls[prop].value;
+
+        if(isRestart) animationTarget.style.animationName = 'none';
+        void animationTarget.offsetWidth;
+
+        Object.assign(animationTarget.style, {
+            animationName: styles.animationName,
+            animationDuration: styles.animationDuration,
+            animationTimingFunction: styles.animationTimingFunction,
+            animationIterationCount: styles.animationIterationCount
+        });
+
+        let outputText = `animation-name: ${styles.animationName};\n`;
+        if(styles.animationDuration) outputText += `animation-duration: ${styles.animationDuration};\n`;
+        if(styles.animationTimingFunction) outputText += `animation-timing-function: ${styles.animationTimingFunction};\n`;
+        if(styles.animationIterationCount) outputText += `animation-iteration-count: ${styles.animationIterationCount};\n`;
+        animationCssOutput.textContent = outputText;
+    }
+    if (animationTarget && restartAnimationBtn) {
+        Object.values(animationControls).forEach(c => { if (c) c.addEventListener('input', () => applyAnimationStyles(true)); });
+        restartAnimationBtn.addEventListener('click', () => applyAnimationStyles(true));
+        applyAnimationStyles();
+    }
+
+    // Transition
+    const transitionTargetElement = $('#transition-target-element');
+    const transitionCssOutput = $('#transition-css-output');
+    const transitionControls = {
+        'transitionProperty': $('#trans-property-input'), 'transitionDuration': $('#trans-duration-input'),
+        'transitionTimingFunction': $('#trans-timing-select'), 'transitionDelay': $('#trans-delay-input')
+    };
+    function applyTransitionStyles() {
+        if(!transitionTargetElement || !transitionCssOutput) return;
+        let styles = {};
+        for (const prop in transitionControls) if(transitionControls[prop]) styles[prop] = transitionControls[prop].value;
+        updateElementStyle(transitionTargetElement, styles, transitionCssOutput);
+    }
+    if(transitionTargetElement) {
+        Object.values(transitionControls).forEach(c => {if(c) c.addEventListener('input', applyTransitionStyles)});
+        applyTransitionStyles();
+    }
+
+    // Filter
+    const filterImageTarget = $('#filter-image-target');
+    const filterSelect = $('#filter-select');
+    const filterCssOutput = $('#filter-css-output');
+    if(filterSelect && filterImageTarget && filterCssOutput){
+        filterSelect.addEventListener('change', function() { updateStyle(filterImageTarget, 'filter', this.value, filterCssOutput); });
+        updateStyle(filterImageTarget, 'filter', filterSelect.value, filterCssOutput);
+    }
+
+    // Backdrop Filter
+    const backdropFilterTarget = $('#backdrop-filter-target');
+    const backdropFilterSelect = $('#backdrop-filter-select');
+    const backdropFilterCssOutput = $('#backdrop-filter-css-output');
+    if(backdropFilterSelect && backdropFilterTarget && backdropFilterCssOutput){
+        backdropFilterSelect.addEventListener('change', function() {
+            updateStyle(backdropFilterTarget, 'backdropFilter', this.value, backdropFilterCssOutput);
+            updateStyle(backdropFilterTarget, 'WebkitBackdropFilter', this.value);
+        });
+        updateStyle(backdropFilterTarget, 'backdropFilter', backdropFilterSelect.value, backdropFilterCssOutput);
+        updateStyle(backdropFilterTarget, 'WebkitBackdropFilter', backdropFilterSelect.value);
+    }
+
+    // Cursor
+    const cursorDemoArea = $('#cursor-demo-area');
+    const cursorSelect = $('#cursor-select');
+    const cursorCssOutput = $('#cursor-css-output');
+    if(cursorSelect && cursorDemoArea && cursorCssOutput){
+        cursorSelect.addEventListener('change', function() { updateStyle(cursorDemoArea, 'cursor', this.value, cursorCssOutput); });
+        updateStyle(cursorDemoArea, 'cursor', cursorSelect.value, cursorCssOutput);
+    }
+
+    // Opacity
+    const opacityTarget = $('#opacity-target');
+    const opacityRange = $('#opacity-range');
+    const opacityValueSpan = $('#opacity-value-span');
+    const opacityCssOutput = $('#opacity-css-output');
+    if(opacityRange && opacityTarget && opacityValueSpan && opacityCssOutput){
+        opacityRange.addEventListener('input', function() {
+            opacityValueSpan.textContent = this.value;
+            updateStyle(opacityTarget, 'opacity', this.value, opacityCssOutput);
+        });
+        opacityValueSpan.textContent = opacityRange.value;
+        updateStyle(opacityTarget, 'opacity', opacityRange.value, opacityCssOutput);
+    }
+
+    // --- JS DOM Manipulation Logic (REVISED FOR SIMPLICITY) ---
+    function initializeDomDemo() {
+        const mainTarget = $('#js-dom-main-target');
+        const domMessageArea = $('#dom-message-area');
+        const domJsCodeOutput = $('#dom-js-code-output');
+        const domElementsContainer = $('#js-dom-demo-container'); // Use the specific container for JS demo
+
+        // Selection Controls
+        const domSelectorInput = $('#dom-selector');
+        const domSelectBtn = $('#dom-select-btn');
+        const domClearHighlightBtn = $('#dom-clear-highlight-btn');
+        let currentlyHighlightedElements = [];
+
+        // Modify #js-dom-main-target content
+        const mainTextContentInput = $('#dom-main-textcontent');
+        const setMainTextContentBtn = $('#dom-set-main-textcontent-btn');
+        const mainInnerHTMLInput = $('#dom-main-innerhtml');
+        const setMainInnerHTMLBtn = $('#dom-set-main-innerhtml-btn');
+
+        // Create & Add to #js-dom-main-target
+        const createTagInput = $('#dom-create-tag');
+        const createTextInput = $('#dom-create-text');
+        const mainAppendBtn = $('#dom-main-append-btn');
+        const mainPrependBtn = $('#dom-main-prepend-btn');
+
+        // Attributes on #js-dom-main-target
+        const mainAttrNameInput = $('#dom-main-attr-name');
+        const mainAttrValueInput = $('#dom-main-attr-value');
+        const mainSetAttrBtn = $('#dom-main-set-attr-btn');
+        const mainGetAttrBtn = $('#dom-main-get-attr-btn');
+        const mainRemoveAttrBtn = $('#dom-main-remove-attr-btn');
+
+        // Styles on #js-dom-main-target
+        const mainStylePropInput = $('#dom-main-style-prop');
+        const mainStyleValueInput = $('#dom-main-style-value');
+        const mainSetStyleBtn = $('#dom-main-set-style-btn');
+
+        // Classes on #js-dom-main-target
+        const mainClassNameInput = $('#dom-main-class-name');
+        const mainAddClassBtn = $('#dom-main-add-class-btn');
+        const mainRemoveClassBtn = $('#dom-main-remove-class-btn');
+        const mainToggleClassBtn = $('#dom-main-toggle-class-btn');
+
+        // Remove Selected (from "Selecting Elements" group)
+        const removeSelectedBtn = $('#dom-remove-selected-btn');
+
+        // Event Listeners on #js-dom-main-target
+        const mainAddListenerBtn = $('#dom-main-add-listener-btn');
+        const mainRemoveListenerBtn = $('#dom-main-remove-listener-btn');
+        const eventHandlerMap = new Map();
+
+
+        function showDomMessage(message, isError = false) {
+            if (!domMessageArea) return;
+            domMessageArea.textContent = message;
+            domMessageArea.style.color = isError ? 'red' : (message.startsWith("Value") ? 'blue' : 'green');
+        }
+
+        function showJsCode(code) {
+            if (!domJsCodeOutput) return;
+            domJsCodeOutput.textContent = `// JS Code Example:\n${code}`;
+        }
+
+        function clearAllJsHighlights() {
+            $all('#js-dom-demo-container .targeted-by-js').forEach(el => el.classList.remove('targeted-by-js'));
+            currentlyHighlightedElements = [];
+        }
+
+        if (domClearHighlightBtn) domClearHighlightBtn.addEventListener('click', () => {
+            clearAllJsHighlights();
+            showDomMessage("Highlights cleared.");
+            showJsCode(`// Highlights cleared.`);
+        });
+
+        if (domSelectBtn && domSelectorInput) {
+            domSelectBtn.addEventListener('click', () => {
+                clearAllJsHighlights();
+                const selector = domSelectorInput.value;
+                if (!selector) {
+                    showDomMessage("Please enter a CSS selector.", true); return;
+                }
+                try {
+                    // Query within the specific js-dom-demo-container
+                    currentlyHighlightedElements = Array.from(domElementsContainer.querySelectorAll(selector));
+                    if (currentlyHighlightedElements.length > 0) {
+                        currentlyHighlightedElements.forEach(el => el.classList.add('targeted-by-js'));
+                        showDomMessage(`${currentlyHighlightedElements.length} element(s) highlighted.`);
+                        showJsCode(`const selected = demoContainer.querySelectorAll("${selector}");`);
+                    } else {
+                        showDomMessage(`No elements found for selector: "${selector}" in the demo box.`);
+                    }
+                } catch (e) {
+                    showDomMessage(`Invalid selector: "${selector}".`, true);
+                }
+            });
+        }
+
+        // --- Actions on #js-dom-main-target ---
+        if (setMainTextContentBtn && mainTextContentInput && mainTarget) {
+            setMainTextContentBtn.addEventListener('click', () => {
+                const newText = mainTextContentInput.value;
+                mainTarget.textContent = newText;
+                showDomMessage("Main target's textContent updated.");
+                showJsCode(`mainTarget.textContent = "${newText.replace(/"/g, '\\"')}";`);
+            });
+        }
+        if (setMainInnerHTMLBtn && mainInnerHTMLInput && mainTarget) {
+            setMainInnerHTMLBtn.addEventListener('click', () => {
+                const newHTML = mainInnerHTMLInput.value;
+                mainTarget.innerHTML = newHTML;
+                showDomMessage("Main target's innerHTML updated. (Note: Use with caution due to security risks with untrusted HTML).");
+                showJsCode(`mainTarget.innerHTML = \`${newHTML.replace(/`/g, '\\`')}\`;`);
+            });
+        }
+
+        function createAndAddToMainTarget(action = 'append') {
+            if (!mainTarget || !createTagInput || !createTextInput) return;
+            const tagName = createTagInput.value.trim();
+            const text = createTextInput.value;
+            if (!tagName) { showDomMessage("Tag name required.", true); return; }
+            const newElem = document.createElement(tagName);
+            newElem.textContent = text;
+            if(action === 'append') mainTarget.appendChild(newElem);
+            else mainTarget.prepend(newElem);
+            showDomMessage(`New <${tagName}> ${action}ed to main target.`);
+            showJsCode(`const newEl = document.createElement("${tagName}");\nnewEl.textContent = "${text.replace(/"/g, '\\"')}";\nmainTarget.${action}(newEl);`);
+        }
+        if(mainAppendBtn) mainAppendBtn.addEventListener('click', () => createAndAddToMainTarget('append'));
+        if(mainPrependBtn) mainPrependBtn.addEventListener('click', () => createAndAddToMainTarget('prepend'));
+
+        if(mainSetAttrBtn && mainAttrNameInput && mainAttrValueInput && mainTarget){
+            mainSetAttrBtn.addEventListener('click', () => {
+                const name = mainAttrNameInput.value.trim();
+                const value = mainAttrValueInput.value;
+                if(!name) { showDomMessage("Attribute name required.", true); return; }
+                mainTarget.setAttribute(name, value);
+                showDomMessage(`Attribute "${name}" set to "${value}" on main target.`);
+                showJsCode(`mainTarget.setAttribute("${name}", "${value.replace(/"/g, '\\"')}");`);
+            });
+        }
+        if(mainGetAttrBtn && mainAttrNameInput && mainTarget){
+            mainGetAttrBtn.addEventListener('click', () => {
+                const name = mainAttrNameInput.value.trim();
+                if(!name) { showDomMessage("Attribute name required.", true); return; }
+                const value = mainTarget.getAttribute(name);
+                showDomMessage(value !== null ? `Value of "${name}": "${value}"` : `Attribute "${name}" not found on main target.`);
+                showJsCode(`const attrValue = mainTarget.getAttribute("${name}");`);
+            });
+        }
+        if(mainRemoveAttrBtn && mainAttrNameInput && mainTarget){
+            mainRemoveAttrBtn.addEventListener('click', () => {
+                const name = mainAttrNameInput.value.trim();
+                if(!name) { showDomMessage("Attribute name required.", true); return; }
+                mainTarget.removeAttribute(name);
+                showDomMessage(`Attribute "${name}" removed from main target.`);
+                showJsCode(`mainTarget.removeAttribute("${name}");`);
+            });
+        }
+
+        if(mainSetStyleBtn && mainStylePropInput && mainStyleValueInput && mainTarget) {
+            mainSetStyleBtn.addEventListener('click', () => {
+                const prop = mainStylePropInput.value.trim(); // Expect camelCase
+                const value = mainStyleValueInput.value.trim();
+                if(!prop) { showDomMessage("Style property name required.", true); return; }
+                mainTarget.style[prop] = value;
+                showDomMessage(`Style "${prop}: ${value}" set on main target.`);
+                showJsCode(`mainTarget.style.${prop} = "${value.replace(/"/g, '\\"')}";`);
+            });
+        }
+
+        function mainClassAction(action) {
+            if(!mainTarget || !mainClassNameInput) return;
+            const className = mainClassNameInput.value.trim();
+            if(!className) { showDomMessage("Class name required.", true); return; }
+            mainTarget.classList[action](className);
+            showDomMessage(`Class "${className}" ${action}ed on main target.`);
+            showJsCode(`mainTarget.classList.${action}("${className}");`);
+        }
+        if(mainAddClassBtn) mainAddClassBtn.addEventListener('click', () => mainClassAction('add'));
+        if(mainRemoveClassBtn) mainRemoveClassBtn.addEventListener('click', () => mainClassAction('remove'));
+        if(mainToggleClassBtn) mainToggleClassBtn.addEventListener('click', () => mainClassAction('toggle'));
+
+        if(removeSelectedBtn){
+            removeSelectedBtn.addEventListener('click', () => {
+                if(currentlyHighlightedElements.length === 0){
+                    showDomMessage("No elements highlighted to remove. Use selector above first.", true); return;
+                }
+                currentlyHighlightedElements.forEach(el => el.remove());
+                showDomMessage(`${currentlyHighlightedElements.length} highlighted element(s) removed.`);
+                showJsCode(`// highlightedElements.forEach(el => el.remove());`);
+                currentlyHighlightedElements = [];
+            });
+        }
+
+        const mainTargetDemoClickHandler = (event) => {
+            const message = `Click listener on #js-dom-main-target fired! You clicked on a ${event.target.tagName} element.`;
+            console.log(message, event.target);
+            showDomMessage(message);
+            showJsCode(`// Click handler for #js-dom-main-target executed.`);
+        };
+
+        if(mainAddListenerBtn && mainTarget){
+            mainAddListenerBtn.addEventListener('click', () => {
+                if(eventHandlerMap.has(mainTarget)) { // Remove previous if any, for simplicity
+                    mainTarget.removeEventListener('click', eventHandlerMap.get(mainTarget));
+                }
+                eventHandlerMap.set(mainTarget, mainTargetDemoClickHandler);
+                mainTarget.addEventListener('click', mainTargetDemoClickHandler);
+                showDomMessage("Click listener added to main target.");
+                showJsCode(`mainTarget.addEventListener('click', yourFunction);`);
+            });
+        }
+        if(mainRemoveListenerBtn && mainTarget){
+            mainRemoveListenerBtn.addEventListener('click', () => {
+                if(eventHandlerMap.has(mainTarget)){
+                    mainTarget.removeEventListener('click', eventHandlerMap.get(mainTarget));
+                    eventHandlerMap.delete(mainTarget);
+                    showDomMessage("Click listener removed from main target.");
+                    showJsCode(`mainTarget.removeEventListener('click', yourFunctionReference);`);
+                } else {
+                    showDomMessage("No demo click listener found on main target to remove.");
+                }
+            });
+        }
+        // Initial message for JS DOM
+        showDomMessage("Welcome to JS DOM Manipulation! Interact with controls to see changes.");
+        showJsCode("/* Ready for DOM actions! */");
+    }
+
+    // Ensure opacity span is updated if it's visible on load.
+    const opacityValueSpanForInit = $('#opacity-value-span');
+    if(opacityValueSpanForInit && $('#opacity-range')) {
+        opacityValueSpanForInit.textContent = $('#opacity-range').value;
+    }
+</script>
+</body>
+</html>
